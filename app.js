@@ -14,7 +14,7 @@ class UI {
       const row = document.createElement("tr");
       row.innerHTML = `
             <td id="myitem">${task.item}</td>
-            <td><a class="btn btn-info" href="#" role="button" id="edit" name="${task.item}">Edit</a></td>
+            <td><a class="btn btn-info" href="#" role="button" id="edit">Edit</a></td>
             `;
 
       list.appendChild(row);
@@ -37,10 +37,16 @@ class UI {
 
   editTask(target) {
     if (target.id === "edit") {
-      document.getElementById("item").value = target.name;
-      itemName = target.name; //stores the item being examined
-      newItem = false;
+      var newText;
       target.parentElement.parentElement.id = "editing"; //id is changed to account for identical tasks
+      target.parentElement.parentElement
+        .querySelectorAll("td#myitem")
+        .forEach((element) => {
+          newText = element.innerHTML;
+        });
+      document.getElementById("item").value = newText;
+      itemName = newText; //stores the item being examined
+      newItem = false;
     }
   }
 }
@@ -53,6 +59,7 @@ document.getElementById("task-form").addEventListener("submit", function (e) {
   ui.addTask(task);
   ui.clearFields();
   e.target.parentElement.parentElement.id = ""; //resets the id for next use;
+
   e.preventDefault();
   newItem = true;
 });
