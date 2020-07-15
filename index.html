@@ -37,14 +37,14 @@
           <thead class="thead-light">
             <tr>
               <th scope="col">Tasks</th>
-              <th scope="col">Edit Item</th>
+              <th scope="col">Edit</th>
+              <th scope="col">Delete</th>
             </tr>
           </thead>
           <tbody id="task-list"></tbody>
         </table>
       </div>
     </div>
-
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
       integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
@@ -60,6 +60,32 @@
       integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
       crossorigin="anonymous"
     ></script>
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-database.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+   https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.16.0/firebase-analytics.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: "AIzaSyAWFkZL35TfjZKGsx4MSUPZE2bjp_kOtZg",
+        authDomain: "ix-2020-green-laurap.firebaseapp.com",
+        databaseURL: "https://ix-2020-green-laurap.firebaseio.com",
+        projectId: "ix-2020-green-laurap",
+        storageBucket: "ix-2020-green-laurap.appspot.com",
+        messagingSenderId: "45563262438",
+        appId: "1:45563262438:web:56d39318b67c23c1121227",
+        measurementId: "G-VM32RB48H6",
+      };
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      firebase.analytics();
+    </script>
     <script src="app.js"></script>
   </body>
 </html>
