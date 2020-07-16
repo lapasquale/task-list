@@ -1,18 +1,72 @@
 var newItem = true;
 var itemName;
+var ui = new firebaseui.auth.AuthUI(firebase.auth());
+var myUsername;
+document.getElementById("page-2").style.display = "none";
+
+var uiConfig = {
+  callbacks: {
+    signInSuccessWithAuthResult: function (authResult, redirectUrl) {
+      // User successfully signed in.
+      // Return type determines whether we continue the redirect automatically
+      // or whether we leave that to developer to handle.
+      return true;
+    },
+    uiShown: function () {
+      // The widget is rendered.
+      // Hide the loader.
+      document.getElementById("loader").style.display = "none";
+    },
+  },
+  credentialHelper: firebaseui.auth.CredentialHelper.NONE,
+  // Will use popup for IDP Providers sign-in flow instead of the default, redirect.
+  signInFlow: "popup",
+  signInSuccessUrl: "index.html",
+  signInOptions: [
+    // Leave the lines as is for the providers you want to offer your users.
+    firebase.auth.EmailAuthProvider.PROVIDER_ID,
+  ],
+};
+ui.start("#firebaseui-auth-container", uiConfig);
+if (ui.isPendingRedirect()) {
+  ui.start("#firebaseui-auth-container", uiConfig);
+}
+var mainApp = {};
+
+firebase.auth().onAuthStateChanged(function (user) {
+  if (user) {
+    document.getElementById("page-1").style.display = "none";
+    document.getElementById("page-2").style.display = "block";
+    myui.initialize();
+    //hide the card for that and display other card
+    myUsername = user.uid;
+  } else {
+    document.getElementById("page-2").style.display = "none";
+    document.getElementById("page-1").style.display = "block";
+    //redirect to login page
+  }
+});
+function logOut() {
+  firebase.auth().signOut();
+  document.getElementById("page-2").style.display = "none";
+  document.getElementById("page-1").style.display = "block";
+}
+mainApp.logOut = logOut;
 
 class Task {
-  constructor(id, item, priority) {
+  constructor(id, item, priority, username) {
     this.item = item;
     this.id = id;
     this.priority = {};
+    this.username = username;
   }
 }
 
 class UI {
   constructor() {
     this.tasks = [];
-
+  }
+  initialize() {
     const url = "https://ix-2020-green-laurap.firebaseio.com/tasks.json";
     fetch(url)
       .then((response) => {
@@ -20,34 +74,41 @@ class UI {
           .json()
           .then((data) => {
             console.log(data);
-
             Object.keys(data).forEach((key) => {
-              console.log(key);
-              console.log(data[key]);
-              const list = document.getElementById("task-list");
-              var priorityUI = document.getElementById("priority");
-              var myPriority = priorityUI.value;
+              if (myUsername === data[key].username) {
+                console.log(data[key].username);
+                console.log(data[key]);
+                const list = document.getElementById("task-list");
+                var priorityUI = document.getElementById("priority");
+                var myPriority = priorityUI.value;
 
-              const taskId = data[key].id;
-              const taskTitle = data[key].title;
-              const taskPriority = data[key].priority;
-              const task = new Task(taskId, taskTitle, taskPriority);
-              this.tasks.push(task);
+                const taskId = data[key].id;
+                const taskTitle = data[key].title;
+                const taskPriority = data[key].priority;
+                const taskUsername = data[key].username;
+                const task = new Task(
+                  taskId,
+                  taskTitle,
+                  taskPriority,
+                  taskUsername
+                );
+                this.tasks.push(task);
 
-              if (taskPriority === "high") {
-                var textColor = "danger";
-              } else if (taskPriority === "medium") {
-                var textColor = "warning";
-              } else if (taskPriority === "low") {
-                var textColor = "success";
-              }
-              const row = document.createElement("tr");
-              row.innerHTML = `
+                if (taskPriority === "high") {
+                  var textColor = "danger";
+                } else if (taskPriority === "medium") {
+                  var textColor = "warning";
+                } else if (taskPriority === "low") {
+                  var textColor = "success";
+                }
+                const row = document.createElement("tr");
+                row.innerHTML = `
                     <td id="myitem" class="text-${textColor}" mykey="${taskId}">${taskTitle}</td>
                     <td><a class="btn btn-info" href="#" role="button" id="edit">Edit</a></td>
                     <td><a class="btn btn-dark" href="#" role="button" id="delete">Delete</a></td>
                     `;
-              list.appendChild(row);
+                list.appendChild(row);
+              }
             });
           })
           .catch((err) => console.log("Err", err));
@@ -62,22 +123,22 @@ class UI {
       low: { color: "green", shortform: "L" },
     });
   }
-  addTask(item) {
+  addTask(item, uid) {
+    const userName = uid;
     const db = firebase.database();
     const list = document.getElementById("task-list");
     var priorityUI = document.getElementById("priority");
-
     if (newItem) {
-    
       var newPostKey = firebase.database().ref("tasks").push().key;
 
       db.ref("tasks/" + newPostKey).set({
         id: newPostKey,
         title: item,
         priority: priorityUI.value,
+        username: userName,
       });
 
-      const task = new Task(newPostKey, item, priorityUI.value);
+      const task = new Task(newPostKey, item, priorityUI.value, userName);
       this.tasks.push(task);
 
       if (priorityUI.value === "high") {
@@ -107,6 +168,7 @@ class UI {
             id: sameId,
             title: item,
             priority: priorityUI.value,
+            username: userName
           });
           if (priorityUI.value === "high") {
             var textColor = "danger";
@@ -158,13 +220,12 @@ class UI {
     }
   }
 }
-const ui = new UI();
 
+const myui = new UI();
 document.getElementById("task-form").addEventListener("submit", function (e) {
   const item = document.getElementById("item").value;
-
-  ui.addTask(item);
-  ui.clearFields();
+  myui.addTask(item, myUsername);
+  myui.clearFields();
   e.target.parentElement.parentElement.id = ""; //resets the id for next use;
 
   e.preventDefault();
@@ -172,6 +233,6 @@ document.getElementById("task-form").addEventListener("submit", function (e) {
 });
 
 document.getElementById("task-list").addEventListener("click", function (e) {
-  ui.editTask(e.target);
+  myui.editTask(e.target);
   e.preventDefault();
 });
