@@ -37,18 +37,22 @@ firebase.auth().onAuthStateChanged(function (user) {
   if (user) {
     document.getElementById("page-1").style.display = "none";
     document.getElementById("page-2").style.display = "block";
+    document.getElementById("myname").innerHTML = firebase.auth().currentUser.email;
     myui.initialize();
     //hide the card for that and display other card
     myUsername = user.uid;
   } else {
-    document.getElementById("page-2").style.display = "none";
+    document.getElementById("cardpage-2").style.display = "none";
+    document.getElementById("tablepage-2").style.display = "none";
     document.getElementById("page-1").style.display = "block";
+    document.getElementById("myname").innerHTML = "Navbar";
     //redirect to login page
   }
 });
 function logOut() {
   firebase.auth().signOut();
-  document.getElementById("page-2").style.display = "none";
+  document.getElementById("cardpage-2").style.display = "none";
+  document.getElementById("tablepage-2").style.display = "none";
   document.getElementById("page-1").style.display = "block";
 }
 mainApp.logOut = logOut;
@@ -122,6 +126,7 @@ class UI {
       medium: { color: "yellow", shortform: "M" },
       low: { color: "green", shortform: "L" },
     });
+    document.getElementsByName("mainpage").id = "page-2";
   }
   addTask(item, uid) {
     const userName = uid;
@@ -184,11 +189,13 @@ class UI {
           `;
         }
       });
+      document.getElementsByName("mainpage").id = "page-2";
     }
   }
 
   clearFields() {
     document.getElementById("item").value = "";
+    document.getElementsByName("mainpage").id = "page-2";
   }
 
   editTask(target) {
@@ -218,6 +225,7 @@ class UI {
       target.parentElement.parentElement.remove();
       newItem = false;
     }
+    document.getElementsByName("mainpage").id = "page-2";
   }
 }
 
@@ -230,9 +238,11 @@ document.getElementById("task-form").addEventListener("submit", function (e) {
 
   e.preventDefault();
   newItem = true;
+  document.getElementsByName("mainpage").id = "page-2";
 });
 
 document.getElementById("task-list").addEventListener("click", function (e) {
   myui.editTask(e.target);
   e.preventDefault();
+  document.getElementsByName("mainpage").id = "page-2";
 });
